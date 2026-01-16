@@ -41,12 +41,7 @@ x-services:
     volumes_from:
       - bitcoind:ro
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'lncli --network=regtest --lnddir=/app/lnd --rpcserver=$$HOSTNAME
-          getinfo',
-        ]
+      test: [ 'CMD-SHELL', 'lncli --network=regtest --lnddir=/app/lnd --rpcserver=$$HOSTNAME getinfo' ]
       interval: 1s
       timeout: 1s
       retries: 30
@@ -89,14 +84,7 @@ x-services:
     volumes_from:
       - bitcoind:ro
     healthcheck:
-      test:
-        [
-          'CMD',
-          'lightning-cli',
-          '--lightning-dir=/app/lightning',
-          '--network=regtest',
-          'getinfo',
-        ]
+      test: [ 'CMD', 'lightning-cli', '--lightning-dir=/app/lightning', '--network=regtest', 'getinfo' ]
       timeout: 1s
       retries: 20
       interval: 1s
@@ -107,8 +95,8 @@ services:
     <<: *base-scripts
     restart: no
     container_name: boltz-cleanup
-    entrypoint: ['/bin/bash', '-c', '/cleanup.sh']
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    entrypoint: [ '/bin/bash', '-c', '/cleanup.sh' ]
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   postgres:
     hostname: postgres
@@ -116,7 +104,7 @@ services:
     restart: always
     image: ${POSTGRES_IMAGE}
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready --dbname boltz --username boltz']
+      test: [ 'CMD-SHELL', 'pg_isready --dbname boltz --username boltz' ]
       interval: 5s
       timeout: 30s
       retries: 10
@@ -125,9 +113,9 @@ services:
       - POSTGRES_DB=boltz
       - POSTGRES_USER=boltz
       - POSTGRES_PASSWORD=boltz
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
     ports:
-      - 5432:5432
+      - 5433:5432
     expose:
       - 5432
 
@@ -143,7 +131,7 @@ services:
       - 6379:6379
     ulimits:
       memlock: -1
-    profiles: ['backend-dev']
+    profiles: [ 'backend-dev' ]
 
   boltz-backend:
     hostname: boltz
@@ -156,8 +144,7 @@ services:
         condition: service_healthy
     restart: always
     image: ${BOLTZ_BACKEND_IMAGE}
-    command:
-      ['--datadir', '/boltz-data', '--configpath', '/boltz-data/boltz.conf']
+    command: [ '--datadir', '/boltz-data', '--configpath', '/boltz-data/boltz.conf' ]
     volumes:
       - boltz-data:/boltz-data
       - lnd2-data:/data/lnd
@@ -167,12 +154,12 @@ services:
     ports:
       - 9000:9000
     healthcheck:
-      test: ['CMD-SHELL', "timeout 1 bash -c 'echo > /dev/tcp/127.0.0.1/9000'"]
+      test: [ 'CMD-SHELL', "timeout 1 bash -c 'echo > /dev/tcp/127.0.0.1/9000'" ]
       timeout: 1s
       retries: 10
       interval: 1s
       start_period: 0s
-    profiles: ['default', 'ci', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'webapp-ci' ]
 
   boltz-backend-nginx:
     hostname: boltz-nginx
@@ -187,12 +174,12 @@ services:
     volumes:
       - nginx-data:/etc/nginx/conf.d
     healthcheck:
-      test: ['CMD-SHELL', 'curl http://localhost:9001/version']
+      test: [ 'CMD-SHELL', 'curl http://localhost:9001/version' ]
       timeout: 1s
       retries: 10
       interval: 1s
       start_period: 0s
-    profiles: ['default', 'ci', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'webapp-ci' ]
 
   boltz-web-app:
     hostname: web-app
@@ -204,7 +191,7 @@ services:
     image: ${BOLTZ_WEBAPP_IMAGE}
     ports:
       - 8080:80
-    profiles: ['default']
+    profiles: [ 'default' ]
 
   boltz-client:
     hostname: boltz-client
@@ -218,7 +205,7 @@ services:
       - 9002:9002
       - 9003:9003
     healthcheck:
-      test: ['CMD', 'boltzcli', '--host', 'boltz-client', 'getinfo']
+      test: [ 'CMD', 'boltzcli', '--host', 'boltz-client', 'getinfo' ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -227,7 +214,7 @@ services:
       - cln1-data:/root/.lightning
       - elements-data:/root/.elements
       - boltz-client-data:/root/.boltz
-    profiles: ['default']
+    profiles: [ 'default' ]
 
   anvil:
     hostname: anvil
@@ -238,12 +225,12 @@ services:
     ports:
       - 8545:8545
     healthcheck:
-      test: ['CMD-SHELL', "timeout 1 bash -c 'echo > /dev/tcp/127.0.0.1/8545'"]
+      test: [ 'CMD-SHELL', "timeout 1 bash -c 'echo > /dev/tcp/127.0.0.1/8545'" ]
       timeout: 1s
       retries: 3
       interval: 1s
       start_period: 0s
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   bitcoind:
     container_name: boltz-bitcoind
@@ -276,19 +263,12 @@ services:
     volumes:
       - bitcoin-data:/app/bitcoin
     healthcheck:
-      test:
-        [
-          'CMD',
-          'bitcoin-cli',
-          '--rpccookiefile=/app/bitcoin/regtest/.cookie',
-          '-regtest',
-          'getblockchaininfo',
-        ]
+      test: [ 'CMD', 'bitcoin-cli', '--rpccookiefile=/app/bitcoin/regtest/.cookie', '-regtest', 'getblockchaininfo' ]
       timeout: 1s
       retries: 1
       interval: 1s
       start_period: 0s
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   elementsd:
     container_name: boltz-elementsd
@@ -308,12 +288,12 @@ services:
     volumes:
       - elements-data:/root/.elements
     healthcheck:
-      test: ['CMD', 'elements-cli', '-getinfo']
+      test: [ 'CMD', 'elements-cli', '-getinfo' ]
       timeout: 1s
       retries: 1
       interval: 1s
       start_period: 0s
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   cln-1:
     container_name: boltz-cln-1
@@ -325,7 +305,7 @@ services:
       - 3000:3000
     volumes:
       - cln1-data:/app/lightning
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   cln-2:
     container_name: boltz-cln-2
@@ -337,7 +317,7 @@ services:
       - 9739:9293
     volumes:
       - cln2-data:/app/lightning
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   lnd-1:
     <<: *base-lnd
@@ -349,7 +329,7 @@ services:
       - 29735:9735
     volumes:
       - lnd1-data:/app/lnd/
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   lnd-2:
     <<: *base-lnd
@@ -359,17 +339,16 @@ services:
       - 11009:10009
     volumes:
       - lnd2-data:/app/lnd/
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   bitcoind-init:
     <<: *base-scripts
     restart: no
     container_name: boltz-bitcoind-init
-    entrypoint:
-      ['/bin/bash', '-c', 'source /etc/profile.d/utils.sh && bitcoind-init']
+    entrypoint: [ '/bin/bash', '-c', 'source /etc/profile.d/utils.sh && bitcoind-init' ]
     depends_on:
       - bitcoind
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   regtest-start:
     <<: *base-scripts
@@ -377,8 +356,7 @@ services:
     container_name: boltz-regtest-start
     environment:
       - COMPOSE_PROFILES=${COMPOSE_PROFILES:-}
-    entrypoint:
-      ['/bin/bash', '-c', 'source /etc/profile.d/utils.sh && regtest-start']
+    entrypoint: [ '/bin/bash', '-c', 'source /etc/profile.d/utils.sh && regtest-start' ]
     depends_on:
       bitcoind-init:
         condition: service_completed_successfully
@@ -394,13 +372,13 @@ services:
         condition: service_healthy
       anvil:
         condition: service_healthy
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   scripts:
     <<: *base-scripts
     restart: no
     container_name: boltz-scripts
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   electrs:
     hostname: electrs-bitcoin
@@ -410,7 +388,7 @@ services:
     depends_on:
       bitcoind-init:
         condition: service_completed_successfully
-    entrypoint: ['electrs-bitcoin']
+    entrypoint: [ 'electrs-bitcoin' ]
     command:
       - --electrum-rpc-addr
       - electrs:19001
@@ -422,17 +400,17 @@ services:
       - regtest
       - --jsonrpc-import
     healthcheck:
-      test: ['CMD-SHELL', 'curl -s $(hostname):3002/blocks/tip/height']
+      test: [ 'CMD-SHELL', 'curl -s $(hostname):3002/blocks/tip/height' ]
       timeout: 1s
       retries: 20
       interval: 2s
       start_period: 5s
     ports:
       - 19001:19001
-      - 3002:3002
+      - 3020:3002
     volumes:
       - bitcoin-data:/root/.bitcoin
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   electrs-liquid:
     hostname: electrs-liquid
@@ -442,7 +420,7 @@ services:
     depends_on:
       elementsd:
         condition: service_healthy
-    entrypoint: ['electrs-liquid']
+    entrypoint: [ 'electrs-liquid' ]
     command:
       - --electrum-rpc-addr
       - electrs-liquid:19002
@@ -460,7 +438,7 @@ services:
       - regtest
       - --jsonrpc-import
     healthcheck:
-      test: ['CMD-SHELL', 'curl -s $(hostname):3003/blocks/tip/height']
+      test: [ 'CMD-SHELL', 'curl -s $(hostname):3003/blocks/tip/height' ]
       timeout: 15s
       retries: 20
       interval: 2s
@@ -470,7 +448,7 @@ services:
       - 3003:3003
     volumes:
       - elements-data:/root/.elements
-    profiles: ['default', 'ci', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'ci', 'backend-dev', 'webapp-ci' ]
 
   esplora:
     hostname: esplora
@@ -485,7 +463,7 @@ services:
     ports:
       - 4002:4002
       - 4003:4003
-    profiles: ['default', 'esplora', 'backend-dev', 'webapp-ci']
+    profiles: [ 'default', 'esplora', 'backend-dev', 'webapp-ci' ]
 
   otterscan:
     hostname: otterscan
@@ -493,14 +471,13 @@ services:
     restart: always
     image: ${OTTERSCAN_IMAGE}
     environment:
-      - OTTERSCAN_CONFIG={"erigonURL":"http://localhost:8545","chainInfo":{"name":"Anvil","faucets":[],"nativeCurrency":{"name":"Rootstock
-        BTC","symbol":"RBTC","decimals":18}}}
+      - OTTERSCAN_CONFIG={"erigonURL":"http://localhost:8545","chainInfo":{"name":"Anvil","faucets":[],"nativeCurrency":{"name":"Rootstock BTC","symbol":"RBTC","decimals":18}}}
     depends_on:
       anvil:
         condition: service_healthy
     ports:
       - 5100:80
-    profiles: ['default']
+    profiles: [ 'default' ]
 
   nbxplorer:
     container_name: boltz-nbxplorer
@@ -520,9 +497,7 @@ services:
       NBXPLORER_MINGAPSIZE: 5
       NBXPLORER_MAXGAPSIZE: 10
       NBXPLORER_VERBOSE: 1
-      NBXPLORER_POSTGRES:
-        User ID=boltz;Password=boltz;Include Error
-        Detail=true;Host=postgres;Port=5432;Database=nbxplorer
+      NBXPLORER_POSTGRES: User ID=boltz;Password=boltz;Include Error Detail=true;Host=postgres;Port=5432;Database=nbxplorer
       NBXPLORER_EXPOSERPC: 1
       NBXPLORER_NOAUTH: 1
     depends_on:
@@ -531,20 +506,14 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test:
-        [
-          'CMD',
-          'bash',
-          '-c',
-          "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/32838'",
-        ]
+      test: [ 'CMD', 'bash', '-c', "timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/32838'" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     volumes:
       - bitcoin-data:/app/bitcoin
-    profiles: ['btcpay', 'ark', 'backend-dev']
+    profiles: [ 'btcpay', 'ark', 'backend-dev' ]
 
   arkd-wallet:
     image: ${ARKD_WALLET_IMAGE}
@@ -560,7 +529,7 @@ services:
       - ARKD_WALLET_DATADIR=./data/regtest
       - ARKD_WALLET_NETWORK=regtest
       - ARKD_WALLET_SIGNER_KEY=afcd3fa10f82a05fddc9574fdb13b3991b568e89cc39a72ba4401df8abef35f0
-    profiles: ['ark', 'backend-dev']
+    profiles: [ 'ark', 'backend-dev' ]
 
   arkd:
     image: ${ARKD_IMAGE}
@@ -587,7 +556,7 @@ services:
       - ARKD_SESSION_DURATION=30
     volumes:
       - arkd-data:/app/data
-    profiles: ['ark', 'backend-dev']
+    profiles: [ 'ark', 'backend-dev' ]
 
   fulmine:
     image: ${FULMINE_IMAGE}
@@ -609,17 +578,17 @@ services:
       - FULMINE_DISABLE_TELEMETRY=true
     volumes:
       - fulmine-data:/app/data
-    profiles: ['ark', 'backend-dev']
+    profiles: [ 'ark', 'backend-dev' ]
 
   backend-dev-ready:
     <<: *base-scripts
     restart: no
     container_name: boltz-backend-dev-ready
-    entrypoint: ['/bin/bash', '-c', 'echo "Backend dev environment ready"']
+    entrypoint: [ '/bin/bash', '-c', 'echo "Backend dev environment ready"' ]
     depends_on:
       regtest-start:
         condition: service_completed_successfully
-    profiles: ['backend-dev']
+    profiles: [ 'backend-dev' ]
 
 volumes:
   boltz-data:
