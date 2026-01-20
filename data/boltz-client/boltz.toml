@@ -20,11 +20,11 @@ url = "http://boltz-nginx:9001"
 # path = "/home/michael/test.db"
 
 [LND]
-host = "host.docker.internal"
-port = 10001
+host = "lnd-1"
+port = 10009
 
-macaroon = "/root/.boltz/alice-credentials/admin.macaroon"
-certificate = "/root/.boltz/alice-credentials/tls.cert"
+macaroon = "/root/.lnd/data/chain/bitcoin/regtest/admin.macaroon"
+certificate = "/root/.lnd/tls.cert"
 
 [RPC]
 # Host of
